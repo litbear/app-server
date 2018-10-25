@@ -1,7 +1,7 @@
 from flask import Flask
 import os, logging
 from xanadu.commons.session import FileSystemSessionInterface
-from xanadu.modules.auth import auth
+from xanadu.modules.auth.views import bp as auth_bp
 
 def create_app(config=None):
     """创建应用实例 并进一步配置"""
@@ -46,6 +46,6 @@ def create_app(config=None):
     app.session_interface = FileSystemSessionInterface(app)
 
     # blueprint
-    app.register_blueprint(auth.bp)
+    app.register_blueprint(auth_bp)
 
     return app
