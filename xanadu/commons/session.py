@@ -5,8 +5,10 @@ import json, os, logging
 
 class FileSystemSession(dict, SessionMixin):
     def __init__(self, **args):
-        dict.__init__(self, args)
-        self.modified = False
+        dict.__init__(self, args, modified=False)
+    
+    def clear(self):
+        dict.clear(self)
 
 class FileSystemSessionInterface(SessionInterface):
 
@@ -17,7 +19,9 @@ class FileSystemSessionInterface(SessionInterface):
             os.makedirs(self.path)
 
     def open_session(self, app, request):
-        session_id = request.cookies.get(app.session_cookie_name)
+        # session_id = request.cookies.get(app.session_cookie_name)
+        from xanadu.commons.util import get_json_arg
+        session_id = request.args.get('token', None) or get_json_arg('token', None)
         # 使用cookies 直接拼文件名是不是安全？
         session_file_path = os.path.join(self.path, '{}.json'.format(session_id))
         if session_id and os.path.exists(session_file_path):
@@ -48,7 +52,6 @@ class FileSystemSessionInterface(SessionInterface):
                     path=path)
             return
         data = dict(session)
-        logging.warning(data.get('session_id'))
         session_id = data.get('session_id', str(uuid4()))
         with open(os.path.join(self.path, '{}.json'.format(session_id)), 'w+') as f:
             json.dump(data, f, indent=4)
